@@ -14,7 +14,8 @@ app.set('port', process.env.PORT || 3000);
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'jade');
 
-app.use(express.bodyParser());
+var bodyParser = require('body-parser')
+app.use(bodyParser.json());
 
 var mongoHost = 'localHost'; //A
 var mongoPort = 27017;
