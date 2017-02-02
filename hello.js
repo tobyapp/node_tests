@@ -43,13 +43,13 @@ app.get('/:collection', function(req, res) { //A
 console.log("/:collection " + req.params.collection );
 var params = req.params; //B
    collectionDriver.findAll(req.params.collection, function(error, objs) { //C
-    	  if (error) { res.send(errorCode, error); } //D
+    	  if (error) { res.status(errorCode).send(error); } //D
 	      else {
 	          if (req.accepts('html')) { //E
     	          res.render('data',{objects: objs, collection: req.params.collection}); //F
 			} else {
 	          res.set('Content-Type','application/json'); //G
-            	res.send(succCode, objs); //H
+              res.status(succCode).send(objs);
               }
          }
    	});
@@ -63,11 +63,12 @@ console.log("/:collection/:entity " + req )
    var collection = params.collection;
    if (entity) {
        collectionDriver.get(collection, entity, function(error, objs) { //J
-          if (error) { res.send(errorCode, error); }
-          else { res.send(succCode, objs); } //K
+          if (error) { res.status(errorCode).send(error); }
+          else { res.status(succCode).send(objs); } //K
        });
    } else {
-      res.send(errorCode, {error: 'bad url', url: req.url});
+      //res.send(errorCode, {error: 'bad url', url: req.url});
+      res.status(errorCode).send({error: 'bad url', url: req.url});
    }
 });
 
@@ -77,8 +78,8 @@ app.post('/:collection', function(req, res) { //A
     console.log("collection: " + collection);
     console.log("object" + object);
     collectionDriver.save(collection, object, function(err,docs) {
-          if (err) { res.send(errorCode, err); }
-          else { res.send(succCode, docs); } //B
+          if (err) { res.status(errorCode).send(err); }
+          else { res.status(succCode).send(docs); } //B
      });
 });
 
@@ -88,12 +89,12 @@ app.put('/:collection/:entity', function(req, res) { //A
     var collection = params.collection;
     if (entity) {
        collectionDriver.update(collection, req.body, entity, function(error, objs) { //B
-          if (error) { res.send(400, error); }
-          else { res.send(200, objs); } //C
+          if (error) { res.status(errorCode).send(error); }
+          else { res.status(succCode).send(objs); } //C
        });
    } else {
        var error = { "message" : "Cannot PUT a whole collection" };
-       res.send(400, error);
+       res.status(errorCode).send(error);
    }
 });
 
@@ -103,12 +104,12 @@ app.delete('/:collection/:entity', function(req, res) { //A
     var collection = params.collection;
     if (entity) {
        collectionDriver.delete(collection, entity, function(error, objs) { //B
-          if (error) { res.send(400, error); }
-          else { res.send(200, objs); } //C 200 b/c includes the original doc
+          if (error) { res.status(errorCode).send(error); }
+          else { res.status(succCode).send(objs); } //C 200 b/c includes the original doc
        });
    } else {
        var error = { "message" : "Cannot DELETE a whole collection" };
-       res.send(400, error);
+       res.status(succCode).send(error);
    }
 });
 
