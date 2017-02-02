@@ -14,13 +14,14 @@ app.set('port', process.env.PORT || 3000);
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'jade');
 
+app.use(express.bodyParser());
 
 var mongoHost = 'localHost'; //A
-var mongoPort = 27017; 
+var mongoPort = 27017;
 var collectionDriver;
- 
+
 var mongoClient = new MongoClient(new Server(mongoHost, mongoPort)); //B
-var url = 'mongodb://' + mongoHost + ':' + mongoPort 
+var url = 'mongodb://' + mongoHost + ':' + mongoPort
 
 mongoClient.connect(url, function(err, db) {
 	if (err) {
@@ -29,31 +30,20 @@ mongoClient.connect(url, function(err, db) {
 	}
 	assert.equal(null, err);
 	console.log("Conncected correctly to server");
-	//var db = mongoClient.db("MyDatabase");  //E
   	collectionDriver = new CollectionDriver(db); //F
 });
-
-//mongoClient.open(function(err, mongoClient) { //C
-//  if (!mongoClient) {
-//      console.error("Error! Exiting... Must start MongoDB first");
-//      process.exit(1); //D
-//  }
-//  var db = mongoClient.db("MyDatabase");  //E
-//  collectionDriver = new CollectionDriver(db); //F
-//});
-
 
 app.use(express.static(path.join(__dirname, 'public')));
 
 app.get('/:collection', function(req, res) { //A
 
-console.log("/:collection " + req.params.collection );   
+console.log("/:collection " + req.params.collection );
 var params = req.params; //B
    collectionDriver.findAll(req.params.collection, function(error, objs) { //C
     	  if (error) { res.send(400, error); } //D
-	      else { 
+	      else {
 	          if (req.accepts('html')) { //E
-    	          res.render('data',{objects: objs, collection: req.params.collection}); //F              
+    	          res.render('data',{objects: objs, collection: req.params.collection}); //F
 			} else {
 	          res.set('Content-Type','application/json'); //G
             	res.send(200, objs); //H
@@ -61,9 +51,9 @@ var params = req.params; //B
          }
    	});
 });
- 
+
 app.get('/:collection/:entity', function(req, res) { //I
-   
+
 console.log("/:collection/:entity " + req )
    var params = req.params;
    var entity = params.entity;
@@ -76,6 +66,17 @@ console.log("/:collection/:entity " + req )
    } else {
       res.send(400, {error: 'bad url', url: req.url});
    }
+});
+
+app.post('/:collection', function(req, res) { //A
+    var object = req.body;
+    var collection = req.params.collection
+    console.log("collection: " + collection);
+    console.log("object" + object);
+    collectionDriver.save(collection, object, function(err,docs) {
+          if (err) { res.send(400, err); }
+          else { res.send(201, docs); } //B
+     });
 });
 
 app.use(function (req,res) { //1
