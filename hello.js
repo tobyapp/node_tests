@@ -20,6 +20,8 @@ app.use(bodyParser.json());
 var mongoHost = 'localHost'; //A
 var mongoPort = 27017;
 var collectionDriver;
+const errorCode = "400"
+const succCode = "200"
 
 var mongoClient = new MongoClient(new Server(mongoHost, mongoPort)); //B
 var url = 'mongodb://' + mongoHost + ':' + mongoPort
@@ -41,13 +43,13 @@ app.get('/:collection', function(req, res) { //A
 console.log("/:collection " + req.params.collection );
 var params = req.params; //B
    collectionDriver.findAll(req.params.collection, function(error, objs) { //C
-    	  if (error) { res.send(400, error); } //D
+    	  if (error) { res.send(errorCode, error); } //D
 	      else {
 	          if (req.accepts('html')) { //E
     	          res.render('data',{objects: objs, collection: req.params.collection}); //F
 			} else {
 	          res.set('Content-Type','application/json'); //G
-            	res.send(200, objs); //H
+            	res.send(succCode, objs); //H
               }
          }
    	});
@@ -61,11 +63,11 @@ console.log("/:collection/:entity " + req )
    var collection = params.collection;
    if (entity) {
        collectionDriver.get(collection, entity, function(error, objs) { //J
-          if (error) { res.send(400, error); }
-          else { res.send(200, objs); } //K
+          if (error) { res.send(errorCode, error); }
+          else { res.send(succCode, objs); } //K
        });
    } else {
-      res.send(400, {error: 'bad url', url: req.url});
+      res.send(errorCode, {error: 'bad url', url: req.url});
    }
 });
 
@@ -75,8 +77,8 @@ app.post('/:collection', function(req, res) { //A
     console.log("collection: " + collection);
     console.log("object" + object);
     collectionDriver.save(collection, object, function(err,docs) {
-          if (err) { res.send(400, err); }
-          else { res.send(201, docs); } //B
+          if (err) { res.send(errorCode, err); }
+          else { res.send(succCode, docs); } //B
      });
 });
 
